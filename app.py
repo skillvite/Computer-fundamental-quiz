@@ -1,58 +1,97 @@
+# skillvite_quiz_app.py
+
 import streamlit as st
-from fpdf import FPDF
-import os
+from PIL import Image, ImageDraw, ImageFont
+import random
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
 
-# Set up quiz questions and answers
-questions = {
-    "What is the function of a CPU?": ("Process data", ["Store data", "Display output", "Process data", "Print data"]),
-    "Which of the following is an input device?": ("Mouse", ["Monitor", "Speaker", "Mouse", "Printer"]),
-    "What does RAM stand for?": ("Random Access Memory", ["Read And Modify", "Run Active Memory", "Random Access Memory", "Run Automated Memory"]),
-    "Which file format is used for documents?": ("DOCX", ["MP3", "DOCX", "EXE", "PNG"]),
-    "What is the internet?": ("A global network", ["A local software", "A printer", "A global network", "A web browser"])
-}
+# ------------------ Google Sheets Setup ------------------
+SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+CREDS = ServiceAccountCredentials.from_json_keyfile_name("skillvite-cert-quiz-creds.json", SCOPE)
+client = gspread.authorize(CREDS)
+sheet = client.open("Skillvite Fundamentals Quiz").sheet1  # You can rename this sheet as needed
 
-st.title("🎓 Fundamentals Course Final Quiz")
-st.markdown("Answer the questions below. You need 70% to pass and receive a certificate.")
+# ------------------ Quiz Questions ------------------
+questions = [
+    {"question": "What is the main function of a computer?", "options": ["Cooking", "Storing and processing data", "Playing music"], "answer": "Storing and processing data"},
+    {"question": "Which of the following is an input device?", "options": ["Monitor", "Keyboard", "Speaker"], "answer": "Keyboard"},
+    {"question": "Which port is commonly used to connect a keyboard?", "options": ["HDMI", "USB", "Ethernet"], "answer": "USB"},
+    {"question": "Which generation of computers used microprocessors?", "options": ["First", "Third", "Fourth"], "answer": "Fourth"},
+    {"question": "Which part of a computer is called the brain?", "options": ["Monitor", "CPU", "RAM"], "answer": "CPU"},
+    {"question": "What is an Operating System?", "options": ["An antivirus program", "A software that manages hardware and software", "A game"], "answer": "A software that manages hardware and software"},
+    {"question": "Which of these is an application software?", "options": ["Windows", "MS Word", "BIOS"], "answer": "MS Word"},
+    {"question": "Which one is used to browse the internet?", "options": ["Google Chrome", "Excel", "Paint"], "answer": "Google Chrome"},
+    {"question": "How do you protect a computer from viruses?", "options": ["Install antivirus", "Use internet a lot", "Open spam emails"], "answer": "Install antivirus"},
+    {"question": "What is the full form of CPU?", "options": ["Central Process Unit", "Central Processing Unit", "Computer Processing Unit"], "answer": "Central Processing Unit"},
+    {"question": "Which is faster: Laptop or Desktop (generally)?", "options": ["Laptop", "Desktop", "They are the same"], "answer": "Desktop"},
+    {"question": "What is a cloud server used for?", "options": ["Making rain", "Storing files online", "Cooling computers"], "answer": "Storing files online"},
+    {"question": "Which key is used to delete?", "options": ["Enter", "Del", "Esc"], "answer": "Del"},
+    {"question": "Which device connects a computer to the internet?", "options": ["Scanner", "Router", "Printer"], "answer": "Router"},
+    {"question": "What is phishing?", "options": ["A way to catch fish", "A scam to steal information", "A type of software"], "answer": "A scam to steal information"},
+    {"question": "What does a search engine do?", "options": ["Stores data", "Finds information online", "Cleans your computer"], "answer": "Finds information online"},
+    {"question": "What is Windows?", "options": ["A door", "An OS", "A folder"], "answer": "An OS"},
+    {"question": "Which software is used to type documents?", "options": ["PowerPoint", "MS Word", "Excel"], "answer": "MS Word"},
+    {"question": "How can you install a new program?", "options": ["Use install file", "Delete old files", "Restart PC"], "answer": "Use install file"},
+    {"question": "What is spam?", "options": ["Useful email", "Unwanted email", "Normal email"], "answer": "Unwanted email"},
+    {"question": "How do you uninstall software?", "options": ["Delete desktop icon", "Control Panel > Uninstall", "Turn off computer"], "answer": "Control Panel > Uninstall"},
+    {"question": "What do you need to set up a desktop?", "options": ["Only monitor", "Monitor, CPU, Keyboard, Mouse", "TV"], "answer": "Monitor, CPU, Keyboard, Mouse"},
+    {"question": "Which part stores long-term data?", "options": ["RAM", "Hard Drive", "Cache"], "answer": "Hard Drive"},
+    {"question": "What is digital tracking?", "options": ["Finding your location online", "Opening files", "Using a mouse"], "answer": "Finding your location online"},
+    {"question": "What might computers be like in the future?", "options": ["Slower", "Faster and smaller", "No change"], "answer": "Faster and smaller"}
+]
 
-name = st.text_input("Enter your full name")
+# ------------------ Certificate Generator ------------------
+def generate_certificate(name):
+    template = Image.open("certificate_template.png")
+    draw = ImageDraw.Draw(template)
+    font = ImageFont.truetype("arialbd.ttf", 45)
+    draw.text((300, 290), name, font=font, fill="black")
+    cert_path = f"certificates/{name.replace(' ', '_')}_certificate.png"
+    template.save(cert_path)
+    return cert_path
 
-score = 0
-responses = {}
+# ------------------ App UI ------------------
+st.set_page_config(page_title="Skillvite Quiz", layout="centered")
+st.title("🖥️ Computer Fundamentals Final Quiz")
+
+name = st.text_input("Enter your full name to begin:")
 
 if name:
-    for q, (correct, options) in questions.items():
-        answer = st.radio(q, options, key=q)
-        responses[q] = answer
-        if answer == correct:
+    score = 0
+    selected_answers = {}
+    questions_sample = questions[:25]
+
+    for i, q in enumerate(questions_sample):
+        st.subheader(f"Q{i+1}. {q['question']}")
+        answer = st.radio("", q['options'], key=i)
+        selected_answers[q['question']] = answer
+        if answer == q['answer']:
             score += 1
 
     if st.button("Submit Quiz"):
-        total = len(questions)
-        percentage = (score / total) * 100
-        st.write(f"✅ **Your Score:** {score}/{total} ({percentage:.0f}%)")
+        st.success(f"You scored {score}/25")
 
-        if percentage >= 70:
-            st.success("Congratulations! You passed the quiz.")
+        # Store result in Google Sheet
+        sheet.append_row([name, score, datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
 
-            # Generate certificate
-            pdf = FPDF(orientation='L')
-            pdf.add_page()
-            pdf.set_font("Arial", "B", 24)
-            pdf.cell(0, 50, "Certificate of Completion", ln=True, align="C")
-            pdf.set_font("Arial", "", 16)
-            pdf.cell(0, 10, f"Awarded to: {name}", ln=True, align="C")
-            pdf.cell(0, 10, f"For successfully passing the Fundamentals Course Quiz.", ln=True, align="C")
-
-            cert_path = f"{name.replace(' ', '_')}_certificate.pdf"
-            pdf.output(cert_path)
-
-            with open(cert_path, "rb") as f:
-                st.download_button("📄 Download Your Certificate", f, file_name="certificate.pdf")
-
-            os.remove(cert_path)
+        if score >= 20:
+            cert_path = generate_certificate(name)
+            st.success("🎉 Congratulations! You passed the quiz.")
+            st.image(cert_path, caption="Your Certificate", use_column_width=True)
+            with open(cert_path, "rb") as file:
+                st.download_button("📥 Download Certificate", data=file, file_name=f"{name}_certificate.png")
         else:
-            st.error("Sorry, you did not pass. Try again!")
+            st.warning("You did not pass. Please try again.")
 
-else:
-    st.info("Please enter your name to start the quiz.")
+        st.subheader("📣 We value your feedback!")
+        feedback = st.text_area("Let us know what you think about this course:")
+        if st.button("Submit Feedback"):
+            sheet.append_row(["Feedback", name, feedback, datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+            st.success("Thank you for your feedback!")
 
+    # Display count of participants
+    all_records = sheet.get_all_records()
+    student_count = len([row for row in all_records if isinstance(row.get("Score"), int)])
+    st.info(f"📊 Total students who attempted the quiz: {student_count}")

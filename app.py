@@ -9,7 +9,11 @@ from datetime import datetime
 
 # ------------------ Google Sheets Setup ------------------
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-CREDS = ServiceAccountCredentials.from_json_keyfile_name("skillvite-cert-quiz-creds.json", SCOPE)
+import json
+
+creds_dict = json.loads(st.secrets["GOOGLE_CREDS"])
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+
 client = gspread.authorize(CREDS)
 sheet = client.open("Skillvite Fundamentals Quiz").sheet1  # You can rename this sheet as needed
 

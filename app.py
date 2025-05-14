@@ -15,7 +15,7 @@ creds = Credentials.from_service_account_info(
 )
 client = gspread.authorize(creds)
 
-sheet = client.open("Skillvite Fundamentals Quiz").sheet1  # You can rename this sheet as needed
+sheet = client.open_by_key("1AoQYzcuprY8qzp5P0NyhNZm249aRQ59V34U9zoL6slc").sheet1  # You can rename this sheet as needed
 
 # ------------------ Quiz Questions ------------------
 questions = [

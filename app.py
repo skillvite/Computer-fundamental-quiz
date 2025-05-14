@@ -4,17 +4,17 @@ import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import random
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
+from google.oauth2.service_account import Credentials
 
-# ------------------ Google Sheets Setup ------------------
-SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-import json
+creds = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=[
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive",
+    ],
+)
+client = gspread.authorize(creds)
 
-creds_dict = json.loads(st.secrets["GOOGLE_CREDS"])
-creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-
-client = gspread.authorize(CREDS)
 sheet = client.open("Skillvite Fundamentals Quiz").sheet1  # You can rename this sheet as needed
 
 # ------------------ Quiz Questions ------------------

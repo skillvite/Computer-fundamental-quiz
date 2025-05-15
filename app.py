@@ -1,4 +1,5 @@
 # skillvite_quiz_app.py
+import os
 from datetime import datetime
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
@@ -50,8 +51,12 @@ questions = [
 def generate_certificate(name):
     template = Image.open("certificate_template.png")
     draw = ImageDraw.Draw(template)
-    font = ImageFont.truetype("ARLRDBD.TTF", 45)
+    font = ImageFont.truetype("arialbd.ttf", 45)
     draw.text((300, 290), name, font=font, fill="black")
+
+    # ✅ Ensure the 'certificates' folder exists
+    os.makedirs("certificates", exist_ok=True)
+
     cert_path = f"certificates/{name.replace(' ', '_')}_certificate.png"
     template.save(cert_path)
     return cert_path

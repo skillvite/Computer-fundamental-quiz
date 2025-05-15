@@ -50,7 +50,7 @@ questions = [
 def generate_certificate(name):
     template = Image.open("certificate_template.png")
     draw = ImageDraw.Draw(template)
-    font = ImageFont.truetype("arialbd.ttf", 45)
+    font = ImageFont.truetype("ARLRDBD.TTF", 45)
     draw.text((300, 290), name, font=font, fill="black")
     cert_path = f"certificates/{name.replace(' ', '_')}_certificate.png"
     template.save(cert_path)

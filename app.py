@@ -88,7 +88,7 @@ if name:
         if score >= 20:
             cert_path = generate_certificate(name)
             st.success("🎉 Congratulations! You passed the quiz.")
-            st.image(cert_path, caption="Your Certificate", use_column_width=True)
+            st.image(cert_path, caption="Your Certificate", use_container_width=True)
             with open(cert_path, "rb") as file:
                 st.download_button("📥 Download Certificate", data=file, file_name=f"{name}_certificate.png")
         else:

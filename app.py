@@ -98,7 +98,7 @@ if name:
 feedback = st.text_area("Let us know what you think about this course:")
 if st.button("Submit Feedback"):
     feedback_sheet = client.open_by_key("1AoQYzcuprY8qzp5P0NyhNZm249aRQ59V34U9zoL6slc").worksheet("Feedback")
-    feedback.append_row([name, feedback, datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+    feedback_sheet.append_row([name, feedback, datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
     st.success("✅ Thank you for your feedback!")
 
     # Display count of participants

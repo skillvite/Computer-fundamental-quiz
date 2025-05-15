@@ -52,7 +52,7 @@ def generate_certificate(name):
     template = Image.open("certificate_template.png")
     draw = ImageDraw.Draw(template)
     font = ImageFont.truetype("arialbd.ttf", 45)
-    draw.text((300, 450), name, font=font, fill="black")
+    draw.text((300, 460), name, font=font, fill="black")
 
     # ✅ Ensure the 'certificates' folder exists
     os.makedirs("certificates", exist_ok=True)
@@ -63,7 +63,7 @@ def generate_certificate(name):
 
 # ------------------ App UI ------------------
 st.set_page_config(page_title="Skillvite Quiz", layout="centered")
-st.title("🖥️ Computer Fundamentals Final Quiz")
+st.title("🖥️ Computer Fundamental Course's Final Quiz")
 
 name = st.text_input("Enter your full name to begin:")
 
@@ -98,7 +98,7 @@ if name:
 feedback = st.text_area("Let us know what you think about this course:")
 if st.button("Submit Feedback"):
     feedback_sheet = client.open_by_key("1AoQYzcuprY8qzp5P0NyhNZm249aRQ59V34U9zoL6slc").worksheet("Feedback")
-    feedback_sheet.append_row([name, feedback, datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+    feedback.append_row([name, feedback, datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
     st.success("✅ Thank you for your feedback!")
 
     # Display count of participants

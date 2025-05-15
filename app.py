@@ -52,7 +52,7 @@ def generate_certificate(name):
     template = Image.open("certificate_template.png")
     draw = ImageDraw.Draw(template)
     font = ImageFont.truetype("arialbd.ttf", 45)
-    draw.text((300, 320), name, font=font, fill="black")
+    draw.text((300, 450), name, font=font, fill="black")
 
     # ✅ Ensure the 'certificates' folder exists
     os.makedirs("certificates", exist_ok=True)
